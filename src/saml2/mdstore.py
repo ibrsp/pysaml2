@@ -806,7 +806,7 @@ class MetaDataMDX(InMemoryMetaData):
         if not url:
             raise SAMLError('URL for MDQ server not specified.')
 
-        self.url = url
+        self.url = url.rstrip('/')
 
         if entity_transform:
             self.entity_transform = entity_transform
