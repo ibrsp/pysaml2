@@ -41,6 +41,10 @@ import defusedxml.ElementTree
 
 NAMESPACE = "http://schemas.xmlsoap.org/soap/envelope/"
 
+SAML_RESPONSE_INPUT = """<input type="hidden" name="{saml_type}" value="{saml_response}"/>"""
+
+RELAY_STATE_INPUT ="""<input type="hidden" name="RelayState" value="{relay_state}"/>"""
+
 FORM_SPEC = """\
 <!DOCTYPE html>
 <html>
@@ -57,9 +61,9 @@ FORM_SPEC = """\
         
         <form action="{action}" method="post">
             <div>
-                <input type="hidden" name="RelayState" value="{relay_state}"/>                
+                {saml_response_input}
                                 
-                <input type="hidden" name="{saml_type}" value="{saml_response}"/>
+                {relay_state_input}
             </div>
             <noscript>
                 <div>
@@ -92,12 +96,18 @@ def http_form_post_message(message, location, relay_state="",
         _msg = message
     _msg = _msg.decode('ascii')
 
+    saml_response_input = SAML_RESPONSE_INPUT.format(saml_type=typ,saml_response=_msg)
+
+    if relay_state:
+        relay_state_input = RELAY_STATE_INPUT.format(relay_state=relay_state)
+    else:
+        relay_state_input = ""
+
     args = {
-       'action'        : location,
-       'saml_type'     : typ,
-       'relay_state'   : relay_state,
-       'saml_response' : _msg
-       }
+            'action': location,
+            'saml_response_input': saml_response_input,
+            'relay_state_input': relay_state_input
+            }
 
     response = FORM_SPEC.format(**args)
 
